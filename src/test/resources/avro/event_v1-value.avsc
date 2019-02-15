@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "Word",
+  "namespace": "ru.zhenik.test.example.schema.avro.v1",
+  "version": "1",
+  "doc": "Word",
+  "fields": [
+    {
+      "name": "payload",
+      "doc": "Word payload",
+      "type": ["null","string"]
+    }
+  ]
+}
