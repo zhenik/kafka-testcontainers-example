@@ -13,11 +13,9 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 
 public class StreamProcessing implements Runnable {
-  private final String bootstrapServers;
   private final KafkaStreams kafkaStreams;
 
   public StreamProcessing(final String bootstrapServers, final String input, final String output) {
-    this.bootstrapServers = bootstrapServers;
     this.kafkaStreams = new KafkaStreams(buildStreamTopology(input, output), Utils.defaultPropertiesStream(bootstrapServers));
   }
 
