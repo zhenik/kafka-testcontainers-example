@@ -8,7 +8,7 @@
     {
       "name": "payload",
       "doc": "Word payload",
-      "type": ["null","string"]
+      "type": "string"
     }
   ]
 }

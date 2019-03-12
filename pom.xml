@@ -62,4 +62,29 @@
 
   </dependencies>
 
+  <build><!-- Generate sources (pojo) from .avsc files -->
+  <plugins>
+    <plugin>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-maven-plugin</artifactId>
+      <version>1.8.2</version>
+      <executions>
+        <execution>
+          <phase>generate-sources</phase>
+          <goals>
+            <goal>schema</goal>
+            <goal>protocol</goal>
+            <goal>idl-protocol</goal>
+          </goals>
+        </execution>
+      </executions>
+      <configuration>
+        <stringType>String</stringType>
+        <sourceDirectory>${project.basedir}/src/main/resources/avro</sourceDirectory>
+        <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+
 </project>
