@@ -22,7 +22,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.kafka.common.serialization.LongDeserializer;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.testcontainers.containers.KafkaContainer;
 
@@ -32,9 +32,8 @@ import static org.junit.Assert.fail;
 
 public class KafkaContainerExampleIT {
 
-  private final String confluentPlatformVersion = "5.1.0";
-
-  @Rule public KafkaContainer kafka = new KafkaContainer(confluentPlatformVersion);
+  private static final String confluentPlatformVersion = "5.1.2";
+  @ClassRule public static KafkaContainer kafka = new KafkaContainer(confluentPlatformVersion);
 
   @Test
   public void adminApi_createTopic()
@@ -48,7 +47,7 @@ public class KafkaContainerExampleIT {
 
     // Assert
     final Collection<TopicListing> topicListings =
-        adminClient.listTopics().listings().get(5, TimeUnit.SECONDS);
+        adminClient.listTopics().listings().get(25, TimeUnit.SECONDS);
 
     assertTrue(
         topicListings.stream()
@@ -108,6 +107,12 @@ public class KafkaContainerExampleIT {
     // Arrange
     final String topicInput = "topic-input";
     final String topicResult = "topic-result";
+
+    final AdminClient adminClient =
+        KafkaAdminClient.create(Utils.defaultPropertiesAdmin(kafka.getBootstrapServers()));
+    createTopic(adminClient, topicInput, 5, (short) 1);
+    createTopic(adminClient, topicResult, 5, (short) 1);
+
     final KafkaProducer<String, String> stringStringKafkaProducer =
         new KafkaProducer<>(Utils.defaultPropertiesProducer(kafka.getBootstrapServers()));
 
@@ -133,18 +138,11 @@ public class KafkaContainerExampleIT {
     // good practise
     Runtime.getRuntime().addShutdownHook(new Thread(streamProcessing::stopStreams));
 
-    await().pollDelay(3, TimeUnit.SECONDS).until(()->{
-        streamProcessing.stopStreams();
-        return true;
-    });
-
-
-
     // Assert
     final String sortedCharsAnagram = "acgim";
     stringLongKafkaConsumer.subscribe(Collections.singleton(topicResult));
     await()
-        .atMost(10, TimeUnit.SECONDS)
+        .atMost(35, TimeUnit.SECONDS)
         .until(
             () -> {
               final ConsumerRecords<String, Long> records =
@@ -155,6 +153,13 @@ public class KafkaContainerExampleIT {
                   .anyMatch(
                       record -> record.key().equals(sortedCharsAnagram) && record.value() == 3);
             });
+
+    // delay before act, async
+    // otherwise stream app work infinite
+    await().pollDelay(9, TimeUnit.SECONDS).until(()->{
+      streamProcessing.stopStreams();
+      return true;
+    });
   }
 
   /**
