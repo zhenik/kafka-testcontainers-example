@@ -32,11 +32,16 @@ public class KafkaContainerExampleAvroIT {
 
   @BeforeClass
   public static void atStart() {
+    String networkAlias = "kafka-and-zookeeper";
     kafka = new KafkaContainer(confluentPlatformVersion);
+    kafka.withNetworkAliases(networkAlias);
     kafka.start();
 
     // get network alias to be able connect other container to env
-    String kafkaInsideDocker = "PLAINTEXT://"+kafka.getNetworkAliases().get(0)+":9092";
+    // approach 1;
+    //String kafkaInsideDocker = "PLAINTEXT://"+kafka.getNetworkAliases().get(0)+":9092";
+    // approach 2;
+    String kafkaInsideDocker = "PLAINTEXT://" + networkAlias + ":9092";
 
     schemaRegistry =
         new GenericContainer(
